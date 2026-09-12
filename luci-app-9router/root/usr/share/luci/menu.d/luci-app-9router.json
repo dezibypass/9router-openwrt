@@ -1,0 +1,18 @@
+{
+  "admin/services/9router": {
+    "title": "9Router",
+    "order": 90,
+    "action": { "type": "alias", "path": "admin/services/9router/status" },
+    "depends": { "uci": { "9router": true } }
+  },
+  "admin/services/9router/status": {
+    "title": "Status",
+    "order": 1,
+    "action": { "type": "template", "path": "9router/status" }
+  },
+  "admin/services/9router/settings": {
+    "title": "Settings",
+    "order": 2,
+    "action": { "type": "cbi", "path": "9router" }
+  }
+}

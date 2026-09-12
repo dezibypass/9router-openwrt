@@ -1,0 +1,24 @@
+#!/bin/sh /etc/rc.common
+START=99
+STOP=10
+USE_PROCD=1
+
+CONFIG=9router
+
+start_service() {
+  config_load "$CONFIG"
+  local enabled port host data_dir
+  config_get_bool enabled main enabled 1
+  config_get port main port 20128
+  config_get host main host 0.0.0.0
+  config_get data_dir main data_dir /mnt/data/9router-data
+  [ "$enabled" = "1" ] || return 1
+  mkdir -p "$data_dir" "$data_dir/db"
+  procd_open_instance 9router
+  procd_set_param command /usr/bin/node /usr/share/9router/app/custom-server.js
+  procd_set_param env PORT="$port" HOSTNAME="$host" DATA_DIR="$data_dir" HOME=/root
+  procd_set_param stdout 1
+  procd_set_param stderr 1
+  procd_set_param respawn 3600 5 5
+  procd_close_instance
+}
