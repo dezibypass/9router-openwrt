@@ -8,6 +8,8 @@ on:
         description: '9router npm version'
         default: '0.5.75'
         required: false
+permissions:
+  contents: write
 jobs:
   ipk:
     runs-on: ubuntu-latest
