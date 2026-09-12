@@ -1,0 +1,8 @@
+dist/
+_ipk/
+_st9/
+_stlu/
+_dl/
+*.ipk
+*.tar.gz
+/tmp/

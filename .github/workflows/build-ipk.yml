@@ -1,0 +1,45 @@
+name: build-ipk
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: '9router npm version'
+        default: '0.5.75'
+        required: false
+permissions:
+  contents: write
+jobs:
+  ipk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set version
+        id: v
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then echo "VER=${{ inputs.version }}" >> $GITHUB_OUTPUT; else echo "VER=0.5.75" >> $GITHUB_OUTPUT; fi
+          echo "VER=$(grep PKG_VERSION package/net/9router/Makefile | head -n1 | awk -F:= '{print $2}' | tr -d ' ')" >> $GITHUB_OUTPUT || true
+      - name: Fetch 9router npm tarball
+        run: |
+          VER=$(grep PKG_VERSION package/net/9router/Makefile | head -n1 | awk -F:= '{print $2}' | tr -d ' ')
+          echo "version=$VER"
+          mkdir -p _dl && cd _dl
+          npm pack 9router@${VER}
+          ls -lh
+      - name: Build ipk (no SDK, ipkg-build style)
+        run: |
+          VER=$(grep PKG_VERSION package/net/9router/Makefile | head -n1 | awk -F:= '{print $2}' | tr -d ' ')
+          chmod +x scripts/make-ipk.sh
+          ./scripts/make-ipk.sh "$VER"
+          ls -lh dist/
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ipk-aarch64_generic
+          path: dist/*.ipk
+      - name: Release on tag
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.ipk

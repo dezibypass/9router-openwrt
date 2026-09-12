@@ -1,0 +1,42 @@
+<%
+local uci = require "luci.model.uci".cursor()
+local port = uci:get("9router","main","port") or "20128"
+local host_cfg = uci:get("9router","main","host") or "0.0.0.0"
+local lanip = luci.sys.exec("uci get network.lan.ipaddr 2>/dev/null"):gsub("\n","")
+if lanip == "" then lanip = "192.168.1.1" end
+local disp_host = host_cfg
+if disp_host == "0.0.0.0" then disp_host = lanip end
+local dash = "http://" .. disp_host .. ":" .. port .. "/login"
+%> <%+header%>
+<h2>9Router</h2>
+<p>Dashboard: <a href="<%=dash%>" target="_blank"><%=dash%></a></p>
+<p>Status service: <code id="svc">cek...</code> <button onclick="refreshStatus()">Refresh</button></p>
+<p><button onclick="doAct('start')">Start</button> <button onclick="doAct('stop')">Stop</button> <button onclick="doAct('restart')">Restart</button></p>
+<hr/>
+<h3>Reset password dashboard</h3>
+<p>Tanpa CLI. Password baru minimal 4 huruf, langsung restart service.</p>
+<p><input id="pw" type="password" placeholder="password baru" style="width:220px"/> <button onclick="resetpw()">Reset & Restart</button></p>
+<pre id="out" style="background:#111;color:#0f0;padding:10px;min-height:60px"></pre>
+<script>
+var base='<%=luci.dispatcher.build_url("admin","services","9router","action")%>';
+function show(t){document.getElementById('out').textContent=t;}
+function doAct(a){
+ show('jalan '+a+'...');
+ fetch(base+'?act='+a,{credentials:'same-origin'}).then(r=>r.text()).then(t=>{show(t); setTimeout(refreshStatus,1500);}).catch(e=>show('ERR '+e));
+}
+function refreshStatus(){
+ fetch(base+'?act=status',{credentials:'same-origin'}).then(r=>r.json()).then(j=>{
+  document.getElementById('svc').textContent=(j.msg||'').substring(0,300);
+  show(j.msg||JSON.stringify(j));
+ }).catch(e=>show('ERR '+e));
+}
+function resetpw(){
+ var pw=document.getElementById('pw').value;
+ if(!pw||pw.length<4){alert('minimal 4 karakter');return;}
+ if(!confirm('Reset password 9Router ke yang baru?'))return;
+ show('reset jalan...');
+ fetch(base+'?act=resetpw&pw='+encodeURIComponent(pw),{credentials:'same-origin'}).then(r=>r.text()).then(t=>{show(t); document.getElementById('pw').value='';}).catch(e=>show('ERR '+e));
+}
+refreshStatus();
+</script>
+<%+footer%>
