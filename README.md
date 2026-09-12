@@ -71,14 +71,22 @@ Or via LuCI: Services -> 9Router -> Settings.
 logread -e 9router | tail -n 20
 ```
 
+### Swap (optional, for 1-2GB RAM boxes)
+
+```sh
+9router-swap 2048          # 2GB swapfile on /mnt/data, enabled + persisted via rc.local
+free -m; swapon -s
+```
+
+
 ## Layout
 
 - `package/net/9router/` — OpenWrt feed (Makefile + files: UCI init, config, reset-password)
 - `luci-app-9router/` — LuCI Services -> 9Router (status + settings + resetpw action)
-- `scripts/` — `9router-expand-data.sh`, `9router-install.sh`, `make-ipk.sh`
+- `scripts/` — `9router-expand-data.sh`, `9router-install.sh`, `9router-swap.sh`, `make-ipk.sh`
 
 ## Tested example (author setup, not a general requirement)
 
-- Board: Amlogic S905X (B860H V1), OpenWrt 24.10.0 armsr/armv8 aarch64
+- Board: Amlogic S905X (B860H V2), OpenWrt 24.10.0 armsr/armv8 aarch64
 - 32GB card: p1 BOOT 255M + p2 ROOT 1G + p3 DATA 27.9G btrfs `/mnt/data` (compress=zstd,noatime)
 - `node v20.20.2` from opkg, `9router 0.5.75` in `/mnt/data/9router`, data in `/mnt/data/9router-data`, port `20128`

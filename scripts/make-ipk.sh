@@ -38,6 +38,7 @@ cp "$ROOT/package/net/9router/files/9router.config" _st9/etc/config/9router
 cp "$ROOT/package/net/9router/files/9router-reset-password" _st9/usr/sbin/9router-reset-password
 cp "$ROOT/scripts/9router-install.sh" _st9/usr/sbin/9router-install
 cp "$ROOT/scripts/9router-expand-data.sh" _st9/usr/sbin/9router-expand-data
+cp "$ROOT/scripts/9router-swap.sh" _st9/usr/sbin/9router-swap
 chmod 755 _st9/etc/init.d/9router _st9/usr/sbin/9router-* 
 mkipk "9router" "$VER" "all" "$ROOT/_st9"
 # --- staging luci ---
